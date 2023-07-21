@@ -1,0 +1,78 @@
+{
+    "id": 0,
+    "name": "",
+    "startTime": "",
+    "endTime": "",
+    "mcqResult": 0,
+    "writtenResult": 0,
+    "notes": "",
+    "questions": [
+        {    
+        "questionId": 1,
+        "type": "MCQ",
+        "question": "Where does the Dursley family live?",
+        "answer": {"i": 4, "value": "Number Four, Privet Drive"},
+        "Choices": [
+            {"i": 1, "value": "Number Sixteen, Privet Drive", "chosen": false},
+            {"i": 2, "value": "Number Six, Diagon Alley", "chosen": false},
+            {"i": 3, "value": "17 North Street", "chosen": false},
+            {"i": 4, "value": "Number Four, Privet Drive", "chosen": false}
+            ]
+        },
+        {    
+            "questionId": 2,
+            "type": "MCQ",
+            "question": "What type of animal does Professor McGonagall transform into?",
+            "answer": {"i": 2, "value": "Cat"},
+            "Choices": [
+                {"i": 1, "value": "Toad", "chosen": false},
+                {"i": 2, "value": "Cat", "chosen": false},
+                {"i": 3, "value": "Owl", "chosen": false},
+                {"i": 4, "value": "Dog", "chosen": false}
+                ]
+        },
+        {    
+            "questionId": 3,
+            "type": "MCQ",
+            "question": "How do the members of the wizard community send their mail?",
+            "answer": {"i": 2, "value": "Owl"},
+            "Choices": [
+                {"i": 1, "value": "By Train", "chosen": false},
+                {"i": 2, "value": "By Owl", "chosen": false},
+                {"i": 3, "value": "By Magic", "chosen": false},
+                {"i": 4, "value": "By Plane", "chosen": false}
+                ]
+        },
+        {    
+            "questionId": 4,
+            "type": "MCQ",
+            "question": "What does Hagrid bring Harry when he first meets him?",
+            "answer": {"i": 1, "value": "A Broomstick"},
+            "Choices": [
+                {"i": 1, "value": "A Broomstick", "chosen": false},
+                {"i": 2, "value": "An Owl", "chosen": false},
+                {"i": 3, "value": "A Flying Motorcycle", "chosen": false},
+                {"i": 4, "value": "A Birthday Cake", "chosen": false}
+                ]
+        },
+        {    
+            "questionId": 5,
+            "type": "MCQ",
+            "question": "How did the Dursleys explain the death of Harry's parents to him?",
+            "answer": {"i": 1, "value": "They Said That His Parents Died In A Car Crash."},
+            "Choices": [
+                {"i": 1, "value": "They Said That His Parents Died In A Car Crash.", "chosen": false},
+                {"i": 2, "value": "They Said That His Parents Died On An Airplane Crash.", "chosen": false},
+                {"i": 3, "value": "They Said That His Parents Died In A Battle With Lord Voldemort.", "chosen": false},
+                {"i": 4, "value": "They Said That His Parents Died In A Wizarding Duel.", "chosen": false}
+                ]
+        },
+        {    
+            "questionId": 6,
+            "type": "written",
+            "question": "Out of the Three Main Characters: Harry, Hermione and Ron, which is you favourite? why?",
+            "answered": ""
+        }
+
+    ]
+}
