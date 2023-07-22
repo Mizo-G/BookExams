@@ -243,7 +243,6 @@
         },
       ],
     };
-    console.log("saving for the first time");
     localStorage.setItem("exam", JSON.stringify(starterExam));
     localExam = JSON.stringify(starterExam);
   }
@@ -260,7 +259,6 @@
   const trim_save = (): void => {
     writtenQuestions.forEach((question) => {
       question.answered = question.answered.trim();
-      console.log(question.answered);
     });
     save();
   };
@@ -309,12 +307,6 @@
     signedIn = !signedIn;
   }
 
-  function getdata() {
-    fetch("http://127.0.0.1:3000/", {
-      method: "GET",
-    }).then((res) => console.log(res.text));
-  }
-
   async function SaveResult() {
     const rawResponse = await fetch(
       "https://c2a9-41-36-40-96.ngrok-free.app/submit",
@@ -328,19 +320,7 @@
       }
     );
     const content = await rawResponse.json();
-
-    console.log(content);
   }
-
-  // fetch("http://127.0.0.1:3000/submit", {
-  //   method: "POST",
-  //   body: "save this",
-  //   headers: {
-  //     "Content-type": "application/json; charset=UTF-8",
-  //   },
-  // })
-  //   .then((res) => res.json())
-  //   .then((json) => console.log(json));
 </script>
 
 {#if !signedIn && !examEnded}
