@@ -284,7 +284,7 @@
     save();
   };
 
-  let signedIn = false;
+  let signedIn = true;
   let userName = "";
   let helpMes = "";
   function SignIn() {
@@ -321,27 +321,34 @@
     );
     const content = await rawResponse.json();
   }
+
+  let choiceStyle = "p-2 rounded m-4 bg-slate-800";
 </script>
 
 {#if !signedIn && !examEnded}
-  <div class="flex flex-col max-w-min gap-2">
-    <label for="signUp" class="text-gray-100">What is your name?</label>
-    <input
-      bind:value={userName}
-      placeholder={helpMes}
-      id="signUp"
-      type="text"
-      class="text-gray-300 border-slate-500 border-2 rounded bg-slate-700"
-    />
-    <button
-      on:click={SignIn}
-      class="border rounded bg-slate-900 text-gray-400 mt-3">Start Exam</button
-    >
+  <div class="flex justify-center items-center h-screen">
+    <div class="flex flex-col p-10 gap-2 mb-48 rounded bg-slate-900 shadow-lg">
+      <label for="signUp" class="text-gray-100 self-center"
+        >What is your name?</label
+      >
+      <input
+        bind:value={userName}
+        placeholder={helpMes}
+        id="signUp"
+        type="text"
+        class="text-gray-200 border-slate-500 border-2 rounded bg-slate-800 p-1"
+      />
+      <button
+        on:click={SignIn}
+        class="border rounded bg-slate-900 text-gray-400 mt-3 p-1"
+        >Start Exam</button
+      >
+    </div>
   </div>
 {/if}
 
 {#if signedIn && !examEnded}
-  <div>
+  <div class="">
     {#each questions as question, i}
       {#if i % 5 == 0 && i != 0}
         <span class="text-gray-100"
@@ -358,27 +365,34 @@
         />
         <hr />
       {/if}
-      <span class="text-gray-100"
-        >{question.questionId} | {question.question}</span
-      >
-      <br />
-      <br />
-
-      {#each question.choices as choice, x}
-        <input
-          type="radio"
-          id="choice-{question.questionId}-{choice.i}"
-          name="choice-{question.questionId}"
-          checked={choice.chosen}
-          on:change={() => ChangeAnswerMCQ(question.questionId, choice.i)}
-        />
-        <label
-          for="choice-{question.questionId}-{choice.i}"
-          class="text-gray-100">{choice.value}</label
+      <div class="mt-3 flex">
+        <span class="text-gray-500">{question.questionId}.</span>
+        <span class="text-gray-100 font-semibold ml-1">
+          {question.question}</span
         >
         <br />
+      </div>
+
+      {#each question.choices as choice, x}
+        <div class="p-2 rounded m-4 bg-slate-800">
+          <input
+            class=""
+            type="radio"
+            id="choice-{question.questionId}-{choice.i}"
+            name="choice-{question.questionId}"
+            checked={choice.chosen}
+            on:change={() => ChangeAnswerMCQ(question.questionId, choice.i)}
+          />
+          <label
+            for="choice-{question.questionId}-{choice.i}"
+            class="text-gray-100">{choice.value}</label
+          >
+          <br />
+        </div>
       {/each}
-      <hr />
+      <hr
+        class="w-80 h-1 mx-auto my-4 bg-gray-100 border-0 rounded md:my-10 dark:bg-gray-600"
+      />
     {/each}
   </div>
 
@@ -392,5 +406,7 @@
 {/if}
 
 {#if examEnded}
-  <h5 class="text-gray-100">Thank you for taking the exam!</h5>
+  <div class="flex justify-center items-center h-screen">
+    <h1 class="text-blue-100 mb-72">Thank you for taking the exam!</h1>
+  </div>
 {/if}
