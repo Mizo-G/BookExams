@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { onMount } from "svelte";
+
   type Answer = {
     i: number;
     value: string;
@@ -263,7 +265,41 @@
     save();
   };
 
+  onMount(() => {
+    type ChoiceListItem = { qId: number; cIdx: number };
+    let choiceList: ChoiceListItem[] = questions.map((q) => {
+      let item: ChoiceListItem = { qId: 0, cIdx: 0 };
+      if (q.choices.find((c) => c.chosen)) {
+        item.qId = q.questionId;
+        item.cIdx = q.choices.find((c) => c.chosen).i;
+      }
+      return item;
+    });
+    choiceList.forEach((c) => {
+      if (!(c.cIdx == 0 && c.qId == 0)) {
+        let ele = document.getElementById(`choice-${c.qId}-${c.cIdx}`);
+        ele.classList.remove("bg-slate-800");
+        ele.classList.add("bg-cyan-700");
+      }
+    });
+  });
+
+  function ChangeChoicebg(questionId: number, answer: number) {
+    let choices = document.getElementsByName(`choice-${questionId}`);
+    if (!choices.length) return;
+    choices.forEach((c) => {
+      if (c.id == `choice-${questionId}-${answer}`) {
+        c.classList.remove("bg-slate-800");
+        c.classList.add("bg-cyan-700");
+      } else {
+        c.classList.remove("bg-cyan-700");
+        c.classList.add("bg-slate-800");
+      }
+    });
+  }
+
   const ChangeAnswerMCQ = (questionId: number, answer: number): void => {
+    ChangeChoicebg(questionId, answer);
     var question: Question = questions.find((x) => x.questionId == questionId);
     var choices: Choice[] = question.choices;
 
@@ -321,8 +357,6 @@
     );
     const content = await rawResponse.json();
   }
-
-  let choiceStyle = "p-2 rounded m-4 bg-slate-800";
 </script>
 
 {#if !signedIn && !examEnded}
@@ -374,19 +408,15 @@
       </div>
 
       {#each question.choices as choice, x}
-        <div class="p-2 rounded m-4 bg-slate-800">
+        <div class="mt-4 mx-4">
           <input
-            class=""
-            type="radio"
+            class="p-2 w-full rounded text-gray-100 text-left bg-slate-800 whitespace-pre-wrap"
+            type="button"
             id="choice-{question.questionId}-{choice.i}"
             name="choice-{question.questionId}"
-            checked={choice.chosen}
-            on:change={() => ChangeAnswerMCQ(question.questionId, choice.i)}
+            value={choice.value}
+            on:click={() => ChangeAnswerMCQ(question.questionId, choice.i)}
           />
-          <label
-            for="choice-{question.questionId}-{choice.i}"
-            class="text-gray-100">{choice.value}</label
-          >
           <br />
         </div>
       {/each}
