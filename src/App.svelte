@@ -2,7 +2,7 @@
   import Exam from "./lib/Exam.svelte";
 </script>
 
-<div class="m-5">
+<div class="m-4">
   <Exam />
 </div>
 

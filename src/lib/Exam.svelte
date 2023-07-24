@@ -249,6 +249,13 @@
     localExam = JSON.stringify(starterExam);
   }
 
+  var examEndedLocal: string = localStorage.getItem("examEnded");
+  if (!examEndedLocal) {
+    examEndedLocal = "false";
+    localStorage.setItem("examEnded", examEndedLocal);
+  }
+  let examEnded = examEndedLocal === "false" ? false : true;
+
   const exam: Exam = JSON.parse(localExam);
 
   const questions: Question[] = exam.questions;
@@ -325,7 +332,7 @@
     save();
   };
 
-  let signedIn = true;
+  let signedIn = !exam.name ? false : true;
   let userName = "";
   let helpMes = "";
   function SignIn() {
@@ -339,7 +346,7 @@
     signedIn = !signedIn;
   }
 
-  let examNotDoneMss = "";
+  let examNotDoneMss = "Solve all questions before ending exam";
   let examNotDone = false;
   function CheckExamDone(): Boolean {
     let done = true;
@@ -352,7 +359,11 @@
       }
     });
 
-    if (!done) return false;
+    if (!done) {
+      examNotDoneMss = "Solve all MCQ questions before ending the exam!";
+      examNotDone = true;
+      return false;
+    }
 
     writtenQuestions.map((wq) => {
       let count = CountWords(wq.questionId / 2 + 1);
@@ -362,15 +373,21 @@
       }
     });
 
-    return done;
+    if (!done) {
+      examNotDoneMss = "Solve all Writing questions before ending the exam!";
+      examNotDone = true;
+      return false;
+    }
+
+    return true;
   }
 
-  let examEnded = false;
   function EndExam() {
     if (!CheckExamDone()) return;
     exam.endTime = new Date().toLocaleString();
     save();
     SaveResult();
+    localStorage.setItem("examEnded", "true");
     examEnded = !examEnded;
     signedIn = !signedIn;
   }
@@ -514,7 +531,10 @@
     {/each}
   </div>
 
-  <div class="flex justify-center">
+  <div class="flex flex-col justify-center items-center">
+    <span class="text-red-600 opacity-60 {examNotDone ? '' : 'hidden'}"
+      >{examNotDoneMss}</span
+    >
     <button
       on:click={EndExam}
       class="rounded shadow-sm bg-red-700 text-gray-400 mt-3 px-3 text-lg"
