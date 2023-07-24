@@ -821,13 +821,6 @@
           question:
             "What are some of the reasons harry wants to join Gryffindor? Why does he not want to join Slytherin?",
         },
-        {
-          questionId: 50,
-          type: "written",
-          answered: "",
-          question:
-            "Would harry have been able to defeat Voldemort without his friends? What role do Hermione and Ron play in defeating Voldemort?",
-        },
       ],
     };
     localStorage.setItem("exam", JSON.stringify(starterExam));
@@ -875,6 +868,8 @@
         ele.classList.add("bg-cyan-700");
       }
     });
+
+    CheckAnswers();
 
     writtenQuestions.map((wq) => {
       CountWords(wq.questionId / 2 + 1);
@@ -971,10 +966,12 @@
     if (!CheckExamDone()) return;
     exam.endTime = new Date().toLocaleString();
     save();
-    SaveResult();
+    // SaveResult();
+    CheckAnswers();
     localStorage.setItem("examEnded", "true");
     examEnded = !examEnded;
-    signedIn = !signedIn;
+    window.scrollTo(0, 0);
+    // signedIn = !signedIn;
   }
 
   async function SaveResult() {
@@ -993,8 +990,6 @@
   }
 
   function CountWords(questionId: number): number {
-    console.log(questionId);
-
     let ele = document.getElementById(
       `textarea-${questionId}`
     ) as HTMLTextAreaElement | null;
@@ -1024,6 +1019,29 @@
 
     return res.length;
   }
+
+  function CheckAnswers() {
+    questions.map((q) => {
+      let chosen = q.choices.find((c) => c.chosen).i;
+      let answer = q.answer.i;
+      let answerEle = document.getElementById(
+        `choice-${q.questionId}-${answer}`
+      ) as HTMLInputElement | undefined;
+      let chosenEle = document.getElementById(
+        `choice-${q.questionId}-${chosen}`
+      ) as HTMLInputElement | undefined;
+
+      if (chosen == answer) {
+        chosenEle.classList.replace("bg-cyan-700", "bg-green-700");
+        chosenEle.value += "  ✓";
+      } else {
+        answerEle.classList.replace("bg-slate-800", "bg-green-700");
+        answerEle.value += "  ✓";
+        chosenEle.classList.replace("bg-cyan-700", "bg-red-700");
+        chosenEle.value += "  x";
+      }
+    });
+  }
 </script>
 
 {#if !signedIn && !examEnded}
@@ -1048,13 +1066,21 @@
   </div>
 {/if}
 
-{#if signedIn && !examEnded}
-  <div class="flex justify-center">
+{#if signedIn}
+  {#if examEnded}
+    <div class="flex justify-center">
+      <h1 class="text-blue-100 my-5 text-2xl font-bold">
+        Thank you for taking the exam!
+      </h1>
+    </div>
+  {/if}
+
+  <div class="flex justify-center {examEnded ? 'hidden' : ''}">
     <span class="text-gray-600">(Choose the correct answer)</span>
   </div>
   <div class="">
     {#each questions as question, i}
-      {#if i % 5 == 0 && i != 0}
+      {#if i % 5 == 0 && i != 0 && i != 26}
         <div class="mt-3 flex">
           <span class="text-gray-500 font-bold">w.</span>
           <div class="flex flex-col">
@@ -1105,7 +1131,9 @@
             id="choice-{question.questionId}-{choice.i}"
             name="choice-{question.questionId}"
             value={choice.value}
-            on:click={() => ChangeAnswerMCQ(question.questionId, choice.i)}
+            on:click={() => {
+              if (!examEnded) ChangeAnswerMCQ(question.questionId, choice.i);
+            }}
           />
           <br />
         </div>
@@ -1115,21 +1143,22 @@
       />
     {/each}
   </div>
-
-  <div class="flex flex-col justify-center items-center">
-    <span class="text-red-600 opacity-60 {examNotDone ? '' : 'hidden'}"
-      >{examNotDoneMss}</span
-    >
-    <button
-      on:click={EndExam}
-      class="rounded shadow-sm bg-red-700 text-gray-400 mt-3 px-3 text-xl"
-      >End Exam</button
-    >
-  </div>
+  {#if !examEnded}
+    <div class="flex flex-col justify-center items-center">
+      <span class="text-red-600 opacity-60 {examNotDone ? '' : 'hidden'}"
+        >{examNotDoneMss}</span
+      >
+      <button
+        on:click={EndExam}
+        class="rounded shadow-sm bg-red-700 text-gray-400 mt-3 px-3 text-xl"
+        >End Exam</button
+      >
+    </div>
+  {/if}
 {/if}
 
-{#if examEnded}
+<!-- {#if examEnded}
   <div class="flex justify-center items-center h-screen">
     <h1 class="text-blue-100 mb-72">Thank you for taking the exam!</h1>
   </div>
-{/if}
+{/if} -->
