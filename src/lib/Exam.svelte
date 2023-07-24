@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import Counter from "./Counter.svelte";
 
   type Answer = {
     i: number;
@@ -80,8 +81,7 @@
           questionId: 3,
           type: "MCQ",
           isCorrect: false,
-          question:
-            "How do the members of the wizard community send their mail?",
+          question: "How do the members of the wizard community s  their mail?",
           answer: { i: 2, value: "Owl" },
           choices: [
             { i: 1, value: "By Train", chosen: false },
@@ -258,7 +258,8 @@
     localStorage.setItem("exam", JSON.stringify(exam));
   };
 
-  const trim_save = (): void => {
+  const trim_save = (questionId: number) => {
+    CountWords(questionId);
     writtenQuestions.forEach((question) => {
       question.answered = question.answered.trim();
     });
@@ -281,6 +282,10 @@
         ele.classList.remove("bg-slate-800");
         ele.classList.add("bg-cyan-700");
       }
+    });
+
+    writtenQuestions.map((wq) => {
+      CountWords(wq.questionId / 2 + 1);
     });
   });
 
@@ -334,8 +339,35 @@
     signedIn = !signedIn;
   }
 
+  let examNotDoneMss = "";
+  let examNotDone = false;
+  function CheckExamDone(): Boolean {
+    let done = true;
+
+    questions.map((q) => {
+      let chosen = q.choices.find((c) => c.chosen);
+      if (chosen === undefined) {
+        done = false;
+        return;
+      }
+    });
+
+    if (!done) return false;
+
+    writtenQuestions.map((wq) => {
+      let count = CountWords(wq.questionId / 2 + 1);
+      if (count < 70) {
+        done = false;
+        return;
+      }
+    });
+
+    return done;
+  }
+
   let examEnded = false;
   function EndExam() {
+    if (!CheckExamDone()) return;
     exam.endTime = new Date().toLocaleString();
     save();
     SaveResult();
@@ -356,6 +388,39 @@
       }
     );
     const content = await rawResponse.json();
+  }
+
+  function CountWords(questionId: number): number {
+    console.log(questionId);
+
+    let ele = document.getElementById(
+      `textarea-${questionId}`
+    ) as HTMLTextAreaElement | null;
+    let textEle = document.getElementById(`wordCount-${questionId}`);
+    let warningEle = document.getElementById(`warning-${questionId}`);
+
+    let res = [];
+    let str = ele.value.replace(/[\t\n\r\.\?\!]/gm, " ").split(" ");
+
+    str.map((s) => {
+      let trimStr = s.trim();
+      if (trimStr.length > 0) {
+        res.push(trimStr);
+      }
+    });
+    textEle.innerText = res.length.toString();
+
+    if (res.length < 70) {
+      warningEle.classList.remove("hidden");
+      ele.classList.add("border-4");
+      ele.classList.add("border-red-500");
+    } else {
+      warningEle.classList.add("hidden");
+      ele.classList.remove("border-4");
+      ele.classList.remove("border-red-500");
+    }
+
+    return res.length;
   }
 </script>
 
@@ -382,22 +447,45 @@
 {/if}
 
 {#if signedIn && !examEnded}
+  <div class="flex justify-center">
+    <span class="text-gray-600">(Choose the correct answer)</span>
+  </div>
   <div class="">
     {#each questions as question, i}
       {#if i % 5 == 0 && i != 0}
-        <span class="text-gray-100"
-          >{writtenQuestions[(question.questionId - 1) / 5 - 1].question}</span
-        >
-        <br />
-        <br />
-        <textarea
-          class="bg-slate-500 border rounded text-gray-300"
-          bind:value={writtenQuestions[(question.questionId - 1) / 5 - 1]
-            .answered}
-          on:input={trim_save}
-          placeholder="start typing..."
+        <div class="mt-3 flex">
+          <span class="text-gray-500 font-bold">w.</span>
+          <div class="flex flex-col">
+            <span
+              class="text-gray-100 font-semibold ml-1 whitespace-pre-wrap break-normal"
+            >
+              {writtenQuestions[(question.questionId - 1) / 5 - 1]
+                .question}</span
+            >
+            <span
+              id="warning-{question.questionId}"
+              class="text-red-500 opacity-80 hidden"
+              >(write at least 70 words)</span
+            >
+            <span class="text-gray-500"
+              >(<span id="wordCount-{question.questionId}">0</span> / 70 words)</span
+            >
+          </div>
+        </div>
+        <div class="mt-4 mx-4 flex h-[35vh]">
+          <textarea
+            id="textarea-{question.questionId}"
+            class="bg-slate-800 p-2 w-full rounded text-gray-300 border-4 border-red-500"
+            bind:value={writtenQuestions[(question.questionId - 1) / 5 - 1]
+              .answered}
+            on:input={() => trim_save(question.questionId)}
+            placeholder="type your answer here..."
+          />
+        </div>
+
+        <hr
+          class="w-80 h-1 mx-auto my-4 bg-gray-100 border-0 rounded md:my-10 dark:bg-gray-600"
         />
-        <hr />
       {/if}
       <div class="mt-3 flex">
         <span class="text-gray-500">{question.questionId}.</span>
@@ -426,10 +514,10 @@
     {/each}
   </div>
 
-  <div class="flex min-w">
+  <div class="flex justify-center">
     <button
       on:click={EndExam}
-      class="border rounded bg-slate-900 text-gray-400 mt-3 px-3"
+      class="rounded shadow-sm bg-red-700 text-gray-400 mt-3 px-3 text-lg"
       >End Exam</button
     >
   </div>
