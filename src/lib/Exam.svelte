@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-
+  import "dotenv";
   import { connect } from "@planetscale/database";
 
   type Answer = {
@@ -853,19 +853,23 @@
   };
 
   const config = {
-    host: "aws.connect.psdb.cloud",
-    rejectUnauthorized: true,
-    username: "uuavqoua94oqm24m19q0",
-    password: "pscale_pw_QEk6DI3FFmtSTkq8nHwiKSwsGkM9gnBSfJUNDQAbvCf",
+    host: import.meta.env.VITE_HOST,
+    rejectUnauthorized: false,
+    username: import.meta.env.VITE_USERNAME,
+    password: import.meta.env.VITE_PASSWORD,
   };
 
   async function SavetoPlanetScale(exam: Exam) {
-    const conn = connect(config);
-    const results = await conn.execute(
-      "INSERT INTO ExamResult (result) VALUES (?)",
-      [JSON.stringify(exam)]
-    );
-    console.log(results);
+    try {
+      const conn = connect(config);
+      const results = await conn.execute(
+        "INSERT INTO ExamResult (result) VALUES (?)",
+        [JSON.stringify(exam)]
+      );
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
   }
 
   onMount(() => {
