@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import Counter from "./Counter.svelte";
+
+  import { connect } from "@planetscale/database";
 
   type Answer = {
     i: number;
@@ -851,7 +852,24 @@
     save();
   };
 
+  const config = {
+    host: "aws.connect.psdb.cloud",
+    rejectUnauthorized: true,
+    username: "uuavqoua94oqm24m19q0",
+    password: "pscale_pw_QEk6DI3FFmtSTkq8nHwiKSwsGkM9gnBSfJUNDQAbvCf",
+  };
+
+  async function SavetoPlanetScale(exam: Exam) {
+    const conn = connect(config);
+    const results = await conn.execute(
+      "INSERT INTO ExamResult (result) VALUES (?)",
+      [JSON.stringify(exam)]
+    );
+    console.log(results);
+  }
+
   onMount(() => {
+    if (!signedIn) return;
     type ChoiceListItem = { qId: number; cIdx: number };
     let choiceList: ChoiceListItem[] = questions.map((q) => {
       let item: ChoiceListItem = { qId: 0, cIdx: 0 };
@@ -962,31 +980,16 @@
     return true;
   }
 
-  function EndExam() {
+  async function EndExam() {
     if (!CheckExamDone()) return;
     exam.endTime = new Date().toLocaleString();
     save();
-    // SaveResult();
+    await SavetoPlanetScale(exam);
     CheckAnswers();
     localStorage.setItem("examEnded", "true");
     examEnded = !examEnded;
     window.scrollTo(0, 0);
     // signedIn = !signedIn;
-  }
-
-  async function SaveResult() {
-    const rawResponse = await fetch(
-      "https://c2a9-41-36-40-96.ngrok-free.app/submit",
-      {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(exam),
-      }
-    );
-    const content = await rawResponse.json();
   }
 
   function CountWords(questionId: number): number {
