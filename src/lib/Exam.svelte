@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import "dotenv";
   import { connect } from "@planetscale/database";
+  import Results from "./Results.svelte";
 
   type Answer = {
     i: number;
@@ -874,6 +875,13 @@
 
   onMount(() => {
     if (!signedIn) return;
+    
+    if(exam.name == 'adminman')
+    {
+      isAdmin = true;
+      console.log('admin man!')
+    } 
+
     type ChoiceListItem = { qId: number; cIdx: number };
     let choiceList: ChoiceListItem[] = questions.map((q) => {
       let item: ChoiceListItem = { qId: 0, cIdx: 0 };
@@ -934,6 +942,8 @@
     save();
   };
 
+  let isAdmin = false
+
   let signedIn = !exam.name ? false : true;
   let userName = "";
   let helpMes = "";
@@ -946,6 +956,13 @@
     exam.startTime = new Date().toLocaleString();
     save();
     signedIn = !signedIn;
+
+    if(exam.name == 'adminman')
+    {
+      isAdmin = true;
+      console.log('admin man!')
+    } 
+    
   }
 
   let examNotDoneMss = "Solve all questions before ending exam";
@@ -962,9 +979,10 @@
     });
 
     if (!done) {
-      examNotDoneMss = "Solve all MCQ questions before ending the exam!";
-      examNotDone = true;
-      return false;
+        let va = 1;
+        examNotDoneMss = "Solve all MCQ questions before ending the exam!";
+        examNotDone = true;
+        return false;
     }
 
     writtenQuestions.map((wq) => {
@@ -1049,6 +1067,7 @@
       }
     });
   }
+
 </script>
 
 {#if !signedIn && !examEnded}
@@ -1073,96 +1092,104 @@
   </div>
 {/if}
 
-{#if signedIn}
-  {#if examEnded}
-    <div class="flex justify-center">
-      <h1 class="text-blue-100 my-5 text-2xl font-bold">
-        Thank you for taking the exam! 
-        <span class="text-gray-600">(You can close this tab now)</span>
-      </h1>
-    </div>
-  {/if}
-  <div class="md:flex flex-col items-center">
-    <div class="md:w-[80vh] flex justify-center {examEnded ? 'hidden' : ''}">
-      <span class="text-gray-600">(Choose the correct answer)</span>
-    </div>
-    <div class="md:w-[80vh]">
-      {#each questions as question, i}
-        {#if i % 5 == 0 && i != 0 && i != 26}
-          <div class="mt-3 flex">
-            <span class="text-gray-500 font-bold">w.</span>
-            <div class="flex flex-col">
-              <span
-                class="text-gray-100 font-semibold ml-1 whitespace-pre-wrap break-normal"
-              >
-                {writtenQuestions[(question.questionId - 1) / 5 - 1]
-                  .question}</span
-              >
-              <span
-                id="warning-{question.questionId}"
-                class="text-red-500 opacity-80 hidden"
-                >(write at least 70 words)</span
-              >
-              <span class="text-gray-500"
-                >(<span id="wordCount-{question.questionId}">0</span> / 70 words)</span
-              >
+{#if isAdmin}
+  <Results/>
+{/if}
+
+{#if !isAdmin}
+  {#if signedIn}
+    {#if examEnded}
+      <div class="flex justify-center">
+        <h1 class="text-blue-100 my-5 text-2xl font-bold">
+          Thank you for taking the exam! 
+          <span class="text-gray-600">(You can close this tab now)</span>
+        </h1>
+      </div>
+    {/if}
+    <div class="md:flex flex-col items-center">
+      <div class="md:w-[80vh] flex justify-center {examEnded ? 'hidden' : ''}">
+        <span class="text-gray-600">(Choose the correct answer)</span>
+      </div>
+      <div class="md:w-[80vh]">
+        {#each questions as question, i}
+          {#if i % 5 == 0 && i != 0 && i != 26}
+            <div class="mt-3 flex">
+              <span class="text-gray-500 font-bold">w.</span>
+              <div class="flex flex-col">
+                <span
+                  class="text-gray-100 font-semibold ml-1 whitespace-pre-wrap break-normal"
+                >
+                  {writtenQuestions[(question.questionId - 1) / 5 - 1]
+                    .question}</span
+                >
+                <span
+                  id="warning-{question.questionId}"
+                  class="text-red-500 opacity-80 hidden"
+                  >(write at least 70 words)</span
+                >
+                <span class="text-gray-500"
+                  >(<span id="wordCount-{question.questionId}">0</span> / 70 words)</span
+                >
+              </div>
             </div>
-          </div>
-          <div class="mt-4 mx-4 flex h-[35vh]">
-            <textarea
-              id="textarea-{question.questionId}"
-              class="bg-slate-800 p-2 w-full rounded text-gray-300 border-4 border-red-500"
-              bind:value={writtenQuestions[(question.questionId - 1) / 5 - 1]
-                .answered}
-              on:input={() => trim_save(question.questionId)}
-              placeholder="type your answer here..."
+            <div class="mt-4 mx-4 flex h-[35vh]">
+              <textarea
+                id="textarea-{question.questionId}"
+                class="bg-slate-800 p-2 w-full rounded text-gray-300 border-4 border-red-500"
+                bind:value={writtenQuestions[(question.questionId - 1) / 5 - 1]
+                  .answered}
+                on:input={() => trim_save(question.questionId)}
+                placeholder="type your answer here..."
+              />
+            </div>
+    
+            <hr
+              class="w-80 h-1 mx-auto my-4 bg-gray-100 border-0 rounded md:my-10 dark:bg-gray-600"
             />
+          {/if}
+          <div class="mt-3 flex">
+            <span class="text-gray-500">{question.questionId}.</span>
+            <span class="text-gray-100 font-semibold ml-1">
+              {question.question}</span
+            >
+            <br />
           </div>
-  
+    
+          {#each question.choices as choice, x}
+            <div class="mt-4 mx-4">
+              <input
+                class="p-2 w-full rounded text-gray-100 text-left bg-slate-800 whitespace-pre-wrap"
+                type="button"
+                id="choice-{question.questionId}-{choice.i}"
+                name="choice-{question.questionId}"
+                value={choice.value}
+                on:click={() => {
+                  if (!examEnded) ChangeAnswerMCQ(question.questionId, choice.i);
+                }}
+              />
+              <br />
+            </div>
+          {/each}
           <hr
             class="w-80 h-1 mx-auto my-4 bg-gray-100 border-0 rounded md:my-10 dark:bg-gray-600"
           />
-        {/if}
-        <div class="mt-3 flex">
-          <span class="text-gray-500">{question.questionId}.</span>
-          <span class="text-gray-100 font-semibold ml-1">
-            {question.question}</span
-          >
-          <br />
-        </div>
-  
-        {#each question.choices as choice, x}
-          <div class="mt-4 mx-4">
-            <input
-              class="p-2 w-full rounded text-gray-100 text-left bg-slate-800 whitespace-pre-wrap"
-              type="button"
-              id="choice-{question.questionId}-{choice.i}"
-              name="choice-{question.questionId}"
-              value={choice.value}
-              on:click={() => {
-                if (!examEnded) ChangeAnswerMCQ(question.questionId, choice.i);
-              }}
-            />
-            <br />
-          </div>
         {/each}
-        <hr
-          class="w-80 h-1 mx-auto my-4 bg-gray-100 border-0 rounded md:my-10 dark:bg-gray-600"
-        />
-      {/each}
-    </div>
-    {#if !examEnded}
-      <div class="flex flex-col justify-center items-center">
-        <span class="text-red-600 opacity-60 {examNotDone ? '' : 'hidden'}"
-          >{examNotDoneMss}</span
-        >
-        <button
-          on:click={EndExam}
-          class="rounded shadow-sm bg-red-700 text-gray-400 mt-3 px-3 text-xl"
-          >End Exam</button
-        >
       </div>
-    {/if}
-  </div>
-
+      {#if !examEnded}
+        <div class="flex flex-col justify-center items-center">
+          <span class="text-red-600 opacity-60 {examNotDone ? '' : 'hidden'}"
+            >{examNotDoneMss}</span
+          >
+          <button
+            on:click={EndExam}
+            class="rounded shadow-sm bg-red-700 text-gray-400 mt-3 px-3 text-xl"
+            >End Exam</button
+          >
+        </div>
+      {/if}
+    </div>
+  {/if}
 {/if}
+
+
+
